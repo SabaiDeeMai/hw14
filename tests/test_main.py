@@ -1,6 +1,6 @@
 import pytest
 
-from main import Category, Product
+from src.main import Category, Product
 
 
 # Фикстура для сброса статических счётчиков перед каждым тестом
@@ -65,6 +65,24 @@ def test_product_types(product_iphone):
     assert isinstance(product_iphone.quantity, int)
 
 
+def test_modify_product_attributes(product_xiaomi):
+    product_xiaomi.price = 35000.0
+    product_xiaomi.quantity = 10
+    assert product_xiaomi.price == 35000.0
+    assert product_xiaomi.quantity == 10
+
+
+def test_product_dict(product_samsung):
+    product = product_samsung
+    expected_dict = {
+        'name': 'Samsung Galaxy S23 Ultra',
+        'description': '256GB, Серый цвет, 200MP камера',
+        'price': 180000.0,
+        'quantity': 5
+    }
+    assert product.__dict__ == expected_dict
+
+
 # Тесты для класса Category
 def test_category_initialization(smartphone_category, product_samsung, product_iphone):
     category = smartphone_category
@@ -90,10 +108,42 @@ def test_empty_category():
     assert Category.product_count == 0
 
 
-# Тесты на корректность подсчётов
+def test_add_product_to_category(smartphone_category):
+    new_product = Product("Nokia 3310", "Легендарный телефон", 1000.0, 1)
+    smartphone_category.products.append(new_product)
+    assert len(smartphone_category.products) == 3
+
+
 def test_total_category_count(smartphone_category, tv_category):
     assert Category.category_count == 2
 
 
 def test_total_product_count(smartphone_category, tv_category):
     assert Category.product_count == 3
+
+
+def test_static_counter_initial_state():
+    assert Category.category_count == 0
+    assert Category.product_count == 0
+
+
+def test_modify_product_attributes(product_xiaomi):
+    product_xiaomi.price = 35000.0
+    product_xiaomi.quantity = 10
+    assert product_xiaomi.price == 35000.0
+    assert product_xiaomi.quantity == 10
+
+
+def test_multiple_categories():
+    p1 = Product("A", "Desc A", 100, 10)
+    p2 = Product("B", "Desc B", 200, 20)
+    cat1 = Category("Cat1", "", [p1])
+    cat2 = Category("Cat2", "", [p2])
+
+    assert Category.category_count == 2
+    assert Category.product_count == 2
+
+
+def test_initial_counters():
+    assert Category.category_count == 0
+    assert Category.product_count == 0

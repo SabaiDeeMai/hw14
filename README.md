@@ -23,7 +23,7 @@
 ### 1. Клонируйте репозиторий:
 
 ```bash
-git clone https://github.com/ваш-никнейм/hw-14.git
+git clone https://github.com/SabaiDeeMai/hw-14.git
 cd hw-14
 ```
 
@@ -40,7 +40,7 @@ poetry install
 Чтобы запустить программу (вывод информации о продуктах и категориях):
 
 ```bash
-python main.py
+python src/main.py
 ```
 
 ---
@@ -50,7 +50,7 @@ python main.py
 Для запуска тестов используйте команду:
 
 ```bash
-poetry run pytest test_main.py -v
+poetry run pytest tests/test_main.py -v
 ```
 
 ---
@@ -60,7 +60,7 @@ poetry run pytest test_main.py -v
 Вы можете сгенерировать отчет о покрытии кода:
 
 ```bash
-poetry run coverage run -m pytest test_main.py
+poetry run coverage run -m pytest tests/test_main.py
 poetry run coverage report -m
 ```
 
@@ -78,9 +78,14 @@ poetry run coverage html
 
 ```
 hw-14/
-├── main.py             # Реализация классов Product и Category
-├── test_main.py        # Юнит-тесты для проверки классов
+├── htmlcov             # Отчет о покрытии кода тестами
+├── src                 # Пакет для модулей с кодом
+    └──main.py          # Реализация классов Product и Category
+├── tests               # Пакет для тестов
+    └──test_main.py     # Юнит-тесты для проверки классов
+├── .coverage           # Не помню, что это
 ├── pyproject.toml      # Конфигурация проекта (зависимости, инструменты)
+├── pytest.ini          # Конфигурация pytest
 ├── README.md           # Это руководство
 └── .flake8             # Настройки линтера flake8 (опционально)
 ```
