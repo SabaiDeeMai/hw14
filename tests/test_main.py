@@ -77,10 +77,39 @@ def test_product_dict(product_samsung):
     expected_dict = {
         'name': 'Samsung Galaxy S23 Ultra',
         'description': '256GB, Серый цвет, 200MP камера',
-        'price': 180000.0,
+        '_price': 180000.0,
         'quantity': 5
     }
     assert product.__dict__ == expected_dict
+
+
+def test_price_setter_invalid_values(caplog, product_xiaomi):
+    original_price = product_xiaomi.price
+    product_xiaomi.price = -100
+    assert product_xiaomi.price == original_price
+    assert "Цена не должна быть нулевая или отрицательная" in caplog.text
+
+    product_xiaomi.price = 0
+    assert product_xiaomi.price == original_price
+    assert "Цена не должна быть нулевая или отрицательная" in caplog.text
+
+
+def test_str_method(product_samsung):
+    assert str(product_samsung) == "Samsung Galaxy S23 Ultra, 180000 руб. Остаток: 5 шт."
+
+
+def test_new_product_classmethod():
+    data = {
+        "name": "Новый Телефон",
+        "description": "Модель 2024 года",
+        "price": 45000.0,
+        "quantity": 12
+    }
+    product = Product.new_product(data)
+    assert product.name == "Новый Телефон"
+    assert product.description == "Модель 2024 года"
+    assert product.price == 45000.0
+    assert product.quantity == 12
 
 
 # Тесты для класса Category
@@ -91,14 +120,12 @@ def test_category_initialization(smartphone_category, product_samsung, product_i
         "Смартфоны, как средство не только коммуникации, "
         "но и получения дополнительных функций для удобства жизни"
     )
-    assert len(category.products) == 2
-    assert category.products[0] is product_samsung
-    assert category.products[1] is product_iphone
+    assert len(category._Category__products) == 2
 
 
 def test_category_counters_on_creation(smartphone_category, tv_category):
     assert Category.category_count == 2
-    assert Category.product_count == 3  # 2 + 1
+    assert Category.product_count == 3
 
 
 def test_empty_category():
@@ -110,8 +137,17 @@ def test_empty_category():
 
 def test_add_product_to_category(smartphone_category):
     new_product = Product("Nokia 3310", "Легендарный телефон", 1000.0, 1)
-    smartphone_category.products.append(new_product)
-    assert len(smartphone_category.products) == 3
+    smartphone_category.add_product(new_product)
+    assert len(smartphone_category._Category__products) == 3
+    assert Category.product_count == 3
+
+
+def test_products_property(smartphone_category):
+    expected_output = (
+        "Samsung Galaxy S23 Ultra, 180000 руб. Остаток: 5 шт.\n"
+        "Iphone 15, 210000 руб. Остаток: 8 шт."
+    )
+    assert smartphone_category.products == expected_output
 
 
 def test_total_category_count(smartphone_category, tv_category):
@@ -125,13 +161,6 @@ def test_total_product_count(smartphone_category, tv_category):
 def test_static_counter_initial_state():
     assert Category.category_count == 0
     assert Category.product_count == 0
-
-
-def test_modify_product_attributes(product_xiaomi):
-    product_xiaomi.price = 35000.0
-    product_xiaomi.quantity = 10
-    assert product_xiaomi.price == 35000.0
-    assert product_xiaomi.quantity == 10
 
 
 def test_multiple_categories():
