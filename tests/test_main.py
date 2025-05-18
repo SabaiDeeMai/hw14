@@ -147,3 +147,38 @@ def test_multiple_categories():
 def test_initial_counters():
     assert Category.category_count == 0
     assert Category.product_count == 0
+
+
+def test_product_str(product_xiaomi):
+    assert str(product_xiaomi) == "Xiaomi Redmi Note 11, 31000.0 руб. Остаток: 14 шт."
+
+def test_category_str(smartphone_category):
+    assert str(smartphone_category) == "Смартфоны, количество продуктов: 2 шт."
+
+def test_product_addition(product_samsung, product_iphone):
+    total = product_samsung + product_iphone
+    expected = (180000.0 * 5) + (210000.0 * 8)
+    assert total == expected
+    assert isinstance(total, float)
+
+def test_product_addition_with_invalid_type(product_samsung):
+    with pytest.raises(TypeError, match="Можно складывать только объекты класса Product"):
+        product_samsung + 100
+
+def test_zero_price_product():
+    p = Product("Бесплатный", "Акционный товар", 0.0, 100)
+    assert p.price == 0.0
+    assert str(p) == "Бесплатный, 0.0 руб. Остаток: 100 шт."
+
+def test_negative_quantity():
+    with pytest.raises(ValueError, match="Количество товара не может быть отрицательным"):
+        Product("Ошибочный", "Товар с отрицательным количеством", 100.0, -1)
+
+def test_category_with_duplicate_products(smartphone_category, product_samsung):
+    initial_count = len(smartphone_category.products)
+    smartphone_category.products.append(product_samsung)
+    assert len(smartphone_category.products) == initial_count + 1
+
+def test_empty_category_str():
+    category = Category("Пустая", "Нет товаров", [])
+    assert str(category) == "Пустая, количество продуктов: 0 шт."
