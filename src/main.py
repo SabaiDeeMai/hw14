@@ -1,9 +1,6 @@
 from typing import List
 
 
-from typing import List
-
-
 class Product:
     """Класс описывает товар"""
 
@@ -36,10 +33,11 @@ class Category:
         self.products: List[Product] = products
 
         Category.category_count += 1
-        Category.product_count += len(products)
+        Category.product_count += sum(p.quantity for p in products)
 
     def __str__(self):
-        return f"{self.name}, количество продуктов: {len(self.products)} шт."
+        total_quantity = sum(p.quantity for p in self.products)
+        return f"{self.name}, количество продуктов: {total_quantity} шт."
 
 
 if __name__ == '__main__':
