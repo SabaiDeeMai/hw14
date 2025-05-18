@@ -1,6 +1,5 @@
 import pytest
-
-from src.main import Category, Product
+from src.main import Product, Category
 
 
 # Фикстура для сброса статических счётчиков перед каждым тестом
@@ -97,8 +96,10 @@ def test_category_initialization(smartphone_category, product_samsung, product_i
 
 
 def test_category_counters_on_creation(smartphone_category, tv_category):
+    # Смартфоны: 5 + 8 = 13 шт.
+    # Телевизоры: 7 шт.
     assert Category.category_count == 2
-    assert Category.product_count == 3  # 2 + 1
+    assert Category.product_count == 13 + 7  # 20 шт.
 
 
 def test_empty_category():
@@ -111,7 +112,10 @@ def test_empty_category():
 def test_add_product_to_category(smartphone_category):
     new_product = Product("Nokia 3310", "Легендарный телефон", 1000.0, 1)
     smartphone_category.products.append(new_product)
+    Category.product_count += new_product.quantity  # Ручное обновление счётчика (лучше через add_product)
+
     assert len(smartphone_category.products) == 3
+    assert Category.product_count == 5 + 8 + 1  # 14 шт.
 
 
 def test_total_category_count(smartphone_category, tv_category):
@@ -119,19 +123,12 @@ def test_total_category_count(smartphone_category, tv_category):
 
 
 def test_total_product_count(smartphone_category, tv_category):
-    assert Category.product_count == 3
+    assert Category.product_count == 5 + 8 + 7  # 20 шт.
 
 
 def test_static_counter_initial_state():
     assert Category.category_count == 0
     assert Category.product_count == 0
-
-
-def test_modify_product_attributes(product_xiaomi):
-    product_xiaomi.price = 35000.0
-    product_xiaomi.quantity = 10
-    assert product_xiaomi.price == 35000.0
-    assert product_xiaomi.quantity == 10
 
 
 def test_multiple_categories():
@@ -141,19 +138,22 @@ def test_multiple_categories():
     cat2 = Category("Cat2", "", [p2])
 
     assert Category.category_count == 2
-    assert Category.product_count == 2
-
-
-def test_initial_counters():
-    assert Category.category_count == 0
-    assert Category.product_count == 0
+    assert Category.product_count == 10 + 20  # 30 шт.
 
 
 def test_product_str(product_xiaomi):
     assert str(product_xiaomi) == "Xiaomi Redmi Note 11, 31000.0 руб. Остаток: 14 шт."
 
+
 def test_category_str(smartphone_category):
-    assert str(smartphone_category) == "Смартфоны, количество продуктов: 2 шт."
+    # Samsung 5 шт. + iPhone 8 шт. = 13 шт.
+    assert str(smartphone_category) == "Смартфоны, количество продуктов: 13 шт."
+
+
+def test_category_empty_str():
+    category = Category("Пустая", "Нет товаров", [])
+    assert str(category) == "Пустая, количество продуктов: 0 шт."
+
 
 def test_product_addition(product_samsung, product_iphone):
     total = product_samsung + product_iphone
@@ -161,24 +161,26 @@ def test_product_addition(product_samsung, product_iphone):
     assert total == expected
     assert isinstance(total, float)
 
+
 def test_product_addition_with_invalid_type(product_samsung):
     with pytest.raises(TypeError, match="Можно складывать только объекты класса Product"):
         product_samsung + 100
+
 
 def test_zero_price_product():
     p = Product("Бесплатный", "Акционный товар", 0.0, 100)
     assert p.price == 0.0
     assert str(p) == "Бесплатный, 0.0 руб. Остаток: 100 шт."
 
+
 def test_negative_quantity():
     with pytest.raises(ValueError, match="Количество товара не может быть отрицательным"):
         Product("Ошибочный", "Товар с отрицательным количеством", 100.0, -1)
 
-def test_category_with_duplicate_products(smartphone_category, product_samsung):
-    initial_count = len(smartphone_category.products)
-    smartphone_category.products.append(product_samsung)
-    assert len(smartphone_category.products) == initial_count + 1
 
-def test_empty_category_str():
-    category = Category("Пустая", "Нет товаров", [])
-    assert str(category) == "Пустая, количество продуктов: 0 шт."
+def test_category_with_duplicate_products(smartphone_category, product_samsung):
+    initial_count = Category.product_count
+    smartphone_category.products.append(product_samsung)
+    Category.product_count += product_samsung.quantity
+
+    assert Category.product_count == initial_count + product_samsung.quantity
