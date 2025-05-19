@@ -4,6 +4,7 @@ from typing import List
 class Product:
     """Класс описывает товар"""
 
+
     def __init__(self, name, description, price, quantity):
         if quantity < 0:
             raise ValueError("Количество товара не может быть отрицательным")
@@ -12,8 +13,10 @@ class Product:
         self.price: float = price
         self.quantity: int = quantity
 
+
     def __str__(self):
         return f"{self.name}, {self.price} руб. Остаток: {self.quantity} шт."
+
 
     def __add__(self, other):
         if not isinstance(other, Product):
@@ -27,6 +30,7 @@ class Category:
     category_count: int = 0
     product_count: int = 0
 
+
     def __init__(self, name, description, products):
         self.name: str = name
         self.description: str = description
@@ -34,6 +38,7 @@ class Category:
 
         Category.category_count += 1
         Category.product_count += sum(p.quantity for p in products)
+
 
     def __str__(self):
         total_quantity = sum(p.quantity for p in self.products)
