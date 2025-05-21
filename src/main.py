@@ -34,12 +34,14 @@ class BaseProduct(ABC):
 
 
 class Product(BaseProduct, InitLoggerMixin):
-    """Класс описывает товар"""
-
     def __init__(self, name, description, price, quantity):
+        super().__init__(name=name, description=description, price=price, quantity=quantity)
+
         if quantity < 0:
             raise ValueError("Количество товара не может быть отрицательным")
-        super().__init__(name=name, description=description, price=price, quantity=quantity)
+        if quantity == 0:
+            raise ValueError("Товар с нулевым количеством не может быть добавлен")
+
         self.name = name
         self.description = description
         self.price = price
@@ -101,6 +103,19 @@ class Category:
 
         self.products.append(product)
         Category.product_count += 1
+
+
+    def average_price(self) -> float:
+        """
+        Рассчитывает среднюю цену товаров в категории
+        Возвращает:
+            float: средняя цена или 0, если нет товаров
+        """
+        try:
+            total_price = sum(product.price for product in self.products)
+            return total_price / len(self.products)
+        except ZeroDivisionError:
+            return 0
 
 
 if __name__ == '__main__':
