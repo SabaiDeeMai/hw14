@@ -112,9 +112,6 @@ def test_product_types(product_iphone):
     assert isinstance(product_iphone.quantity, int)
 
 
-# ... (остальные существующие тесты остаются без изменений)
-
-
 @pytest.fixture
 def smartphone():
     return Smartphone(
@@ -146,9 +143,6 @@ def test_add_different_class_products(smartphone, lawn_grass):
     """Проверяем, что нельзя складывать товары разных классов"""
     with pytest.raises(TypeError, match="Можно складывать только товары одного класса"):
         smartphone + lawn_grass
-
-
-# ... (остальные существующие тесты)
 
 
 # Фикстура для сброса статических счётчиков перед каждым тестом
@@ -383,11 +377,11 @@ def test_add_product_with_subclass(smartphone_category):
         smartphone_category.add_product("Not a product")
 
 
-def test_product_addition_with_zero_quantity():
-    """Проверяем сложение товаров с нулевым количеством"""
-    p1 = Product("Товар 1", "Описание", 1000.0, 0)
-    p2 = Product("Товар 2", "Описание", 2000.0, 0)
-    assert p1 + p2 == 0.0
+def test_zero_quantity_validation():
+    """Проверяем создание товара с нулевым количеством"""
+    with pytest.raises(ValueError) as excinfo:
+        Product("Тест", "Описание", 100, 0)
+    assert "Товар с нулевым количеством не может быть добавлен" in str(excinfo.value)
 
 
 def test_product_addition_with_updated_quantity(product_samsung):
@@ -411,14 +405,16 @@ def test_category_str_representation(smartphone_category):
 
 def test_product_addition_edge_cases():
     """Проверка крайних случаев сложения товаров"""
-    p1 = Product("Товар 1", "Описание", 1000.0, 0)
-    p2 = Product("Товар 2", "Описание", 2000.0, 0)
-    assert p1 + p2 == 0.0
-
-    # Сложение с отрицательной ценой (должно работать, если quantity положительное)
     p3 = Product("Товар 3", "Описание", -500.0, 2)
     p4 = Product("Товар 4", "Описание", 1000.0, 3)
     assert p3 + p4 == (-500.0 * 2 + 1000.0 * 3)
+
+
+def test_negative_quantity_validation():
+    """Проверяем создание товара с отрицательным количеством"""
+    with pytest.raises(ValueError) as excinfo:
+        Product("Тест", "Описание", 100, -1)
+    assert "Количество товара не может быть отрицательным" in str(excinfo.value)
 
 
 def test_category_add_multiple_products(smartphone_category):
