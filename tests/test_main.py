@@ -434,3 +434,12 @@ def test_category_remove_product(smartphone_category, product_iphone):
     initial_count = len(smartphone_category.products)
     smartphone_category.products.remove(product_iphone)
     assert len(smartphone_category.products) == initial_count - 1
+
+
+def test_average_price_with_products(smartphone_category, product_samsung, product_iphone):
+    # Средняя цена двух смартфонов: (180000 + 210000) / 2 = 195000
+    assert smartphone_category.average_price() == 195000.0
+
+def test_average_price_empty_category():
+    empty_category = Category("Пустая", "Нет товаров", [])
+    assert empty_category.average_price() == 0
