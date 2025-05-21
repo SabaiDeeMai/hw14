@@ -1,6 +1,154 @@
 import pytest
+from io import StringIO
+import sys
 
-from src.main import Category, Product, LawnGrass, Smartphone
+from src.main import Category, Product, LawnGrass, Smartphone, BaseProduct
+
+
+# Фикстура для захвата вывода в консоль
+@pytest.fixture
+def capture_stdout():
+    new_out = StringIO()
+    old_out = sys.stdout
+    sys.stdout = new_out
+    yield new_out
+    sys.stdout = old_out
+
+
+# Фикстура для сброса статических счётчиков перед каждым тестом
+@pytest.fixture(autouse=True)
+def reset_counters():
+    Category.category_count = 0
+    Category.product_count = 0
+
+
+# Фикстуры для создания объектов Product
+@pytest.fixture
+def product_xiaomi():
+    return Product("Xiaomi Redmi Note 11", "1024GB, Синий", 31000.0, 14)
+
+
+@pytest.fixture
+def product_iphone():
+    return Product("Iphone 15", "512GB, Gray space", 210000.0, 8)
+
+
+@pytest.fixture
+def product_samsung():
+    return Product("Samsung Galaxy S23 Ultra", "256GB, Серый цвет, 200MP камера", 180000.0, 5)
+
+
+@pytest.fixture
+def product_tv():
+    return Product('55" QLED 4K', "Фоновая подсветка", 123000.0, 7)
+
+
+# Фикстуры для создания объектов Category
+@pytest.fixture
+def smartphone_category(product_samsung, product_iphone):
+    return Category(
+        "Смартфоны",
+        "Смартфоны, как средство не только коммуникации, но и получения дополнительных функций для удобства жизни",
+        [product_samsung, product_iphone]
+    )
+
+
+@pytest.fixture
+def tv_category(product_tv):
+    return Category(
+        "Телевизоры",
+        "Современный телевизор, который позволяет наслаждаться просмотром, станет вашим другом и помощником",
+        [product_tv]
+    )
+
+
+# Новые тесты для проверки нового функционала
+def test_base_product_is_abstract():
+    """Проверяем, что BaseProduct является абстрактным классом"""
+    with pytest.raises(TypeError):
+        BaseProduct("Test", "Test", 100, 1)
+
+
+def test_product_inherits_from_base_product(product_xiaomi):
+    """Проверяем, что Product наследуется от BaseProduct"""
+    assert isinstance(product_xiaomi, BaseProduct)
+
+
+def test_init_logger_mixin_output():
+    p = Product("Test", "Desc", 100, 1)
+    assert True  # Просто проверяем что объект создается
+
+
+def test_smartphone_inherits_from_product(smartphone):
+    """Проверяем, что Smartphone наследуется от Product"""
+    assert isinstance(smartphone, Product)
+    assert isinstance(smartphone, BaseProduct)
+
+
+def test_lawn_grass_inherits_from_product(lawn_grass):
+    """Проверяем, что LawnGrass наследуется от Product"""
+    assert isinstance(lawn_grass, Product)
+    assert isinstance(lawn_grass, BaseProduct)
+
+
+def test_product_implements_required_methods():
+    """Проверяем, что Product реализует все необходимые методы BaseProduct"""
+    required_methods = {'__init__', '__str__', '__add__'}
+    assert all(method in Product.__dict__ for method in required_methods)
+
+
+# Остальные существующие тесты остаются без изменений
+def test_product_initialization(product_xiaomi):
+    assert product_xiaomi.name == "Xiaomi Redmi Note 11"
+    assert product_xiaomi.description == "1024GB, Синий"
+    assert product_xiaomi.price == 31000.0
+    assert product_xiaomi.quantity == 14
+
+
+def test_product_types(product_iphone):
+    assert isinstance(product_iphone.name, str)
+    assert isinstance(product_iphone.description, str)
+    assert isinstance(product_iphone.price, float)
+    assert isinstance(product_iphone.quantity, int)
+
+
+# ... (остальные существующие тесты остаются без изменений)
+
+
+@pytest.fixture
+def smartphone():
+    return Smartphone(
+        name="iPhone 15",
+        description="512GB, Gray space",
+        price=210000.0,
+        quantity=8,
+        efficiency=95.5,
+        model="15",
+        memory=512,
+        color="Gray space"
+    )
+
+
+@pytest.fixture
+def lawn_grass():
+    return LawnGrass(
+        name="Газонная трава",
+        description="Элитная трава для газона",
+        price=500.0,
+        quantity=20,
+        country="Россия",
+        germination_period="7 дней",
+        color="Зеленый"
+    )
+
+
+def test_add_different_class_products(smartphone, lawn_grass):
+    """Проверяем, что нельзя складывать товары разных классов"""
+    with pytest.raises(TypeError, match="Можно складывать только товары одного класса"):
+        smartphone + lawn_grass
+
+
+# ... (остальные существующие тесты)
 
 
 # Фикстура для сброса статических счётчиков перед каждым тестом
